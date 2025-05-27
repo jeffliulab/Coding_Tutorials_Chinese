@@ -572,4 +572,92 @@ class RandomizedSet(object):
 
 
 
+#####################################################################
+# (13) 238. Product of Array Except Self
 
+class Solution(object):
+    def productExceptSelf(self, nums):
+        """
+        :type nums: List[int]
+        :rtype: List[int]
+        
+        解法策略：使用前缀积和后缀积，完成 O(n) 时间、O(1) 空间构建（输出数组不计入空间复杂度）。
+        """
+
+        # 解法说明（现实意义）：
+        # 本题禁止使用除法，除了为了增加算法难度外，这个限制在现实中也有工程意义：
+        # 1. 精度问题：除法涉及浮点运算，容易因精度误差导致错误结果，尤其在金融/科学计算中更明显。
+        # 2. 安全性：某些系统（如密码学或安全领域）中，除法操作可能泄露信息或引发边界错误（如除0）。
+        # 3. 性能成本：在嵌入式系统、图形硬件（GPU）等平台中，除法远比乘法慢，影响运行效率。
+        # 4. 多个0处理困难：若数组中有多个0，除法方案逻辑复杂化（要特判0，逻辑分支多，代码不优雅）。        
+        # 因此，面试中出此题不仅考察你的算法思维，也考查你面对限制条件时的建模和应变能力。
+
+        n = len(nums)
+        res = [1] * n  # 初始化结果数组，每个位置默认乘积为1
+
+        # 第一遍：构建每个位置左侧所有元素的乘积
+        left = 1
+        for i in range(n):
+            res[i] = left
+            left *= nums[i]
+
+        # 第二遍：从右往左乘上右侧所有元素的乘积
+        right = 1
+        for i in range(n - 1, -1, -1):
+            res[i] *= right
+            right *= nums[i]
+
+        return res
+
+#####################################################################
+# (14) 134. Gas Station
+
+class Solution(object):
+    def canCompleteCircuit(self, gas, cost):
+        """
+        :type gas: List[int]
+        :type cost: List[int]
+        :rtype: int
+        """
+
+        # 如果总gas小于总cost，那么可以直接判定没有任何一个地方出发可以跑完一圈
+        if sum(gas) < sum(cost):
+            return -1
+        
+        # 在确定能跑完一圈的情况下，我们只需要排除不能作为起点的选项，就可以找到合法的出发点
+        tank = 0
+        start = 0
+
+        for i in range(len(gas)):
+            tank += gas[i] - cost[i]
+            if tank < 0:
+                start = i + 1 # 排除掉当前的出发点选项
+                tank = 0
+        
+        return start
+    
+#####################################################################
+# (15) 135. Candy
+
+class Solution(object):
+    def candy(self, ratings):
+        """
+        :type ratings: List[int]
+        :rtype: int
+
+        策略: 本题只涉及邻居对比, 不涉及全局路径调整, greedy显然就足够了
+        """
+        candy = len(ratings) * [1]
+
+        # 从左往右，保证右边的高分学生总是比左边的低分学生多
+        for i in range(1,len(ratings)):
+            if ratings[i] > ratings[i-1]:
+                candy[i] = candy[i-1] + 1
+        
+        # 从右往左，保证左边的高分学生总是比右边的低分学生多
+        for i in range(len(ratings)-2, -1, -1):
+            if ratings[i] > ratings[i+1]:
+                candy[i]  = max(candy[i], candy[i+1] + 1) # 关键点，保留了第一轮此的发糖结果
+
+        return sum(candy)
+        
